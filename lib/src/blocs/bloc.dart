@@ -1,33 +1,31 @@
 import 'dart:async';
-
-import 'package:login_bloc/src/blocs/validators.dart';
+import './validators.dart';
 import 'package:rxdart/rxdart.dart';
 
-class Bloc with Validators{
-  final _email =  BehaviorSubject<String>();
-  final _password = BehaviorSubject<String>();
+//conectar a validadores mediante mixings --- reutilizar el codigo de una clase en multiples jerarquia de clases
+class Bloc with Validators {
+  final _emailController =  StreamController<String>.broadcast();
+  final _passwordController = StreamController<String>.broadcast();
 
-  //Agregar data al stream
-  Function(String) get changeEmail => _email.sink.add;
-  Function(String) get changePassword => _password.sink.add;
+  //agregando data al stream //add data to stream
 
-  //Recuperar datos del stream
-  Stream<String> get email => _email.stream.transform(validateEmail);
-  Stream<String> get password => _password.stream.transform(validatePassword);
-  Stream<bool>get submitValid => Observable.combineLatest2(email,password,(e,p)=>true);
+  Function(String) get changeEmail => _emailController.sink.add;
+  Function(String) get changePassword => _passwordController.sink.add;
 
+  //recuperar data del stream //retrive data from stream
 
-  submit(){
-    final validEmail = _email.value;
-    final validPassword = _password.value;
-    print('Email is $validEmail');
-    print('Password  is $validPassword');
-  }
+  Stream<String> get email => _emailController.stream.transform(validateEmail);
+  Stream<String> get password => _passwordController.stream.transform(validatePassword);
+  Stream<bool> get submitValid => Observable.combineLatest2(email, password,(e,p) => true);
 
+  //deshacer cuando no lo utilizamos
   void dispose(){
-    _email.close();
-    _password.close();
+    _emailController.close();
+    _passwordController.close();
   }
 }
 
-final bloc  = Bloc();
+//singled global instance
+//scoped global instance
+
+final bloc = Bloc();
